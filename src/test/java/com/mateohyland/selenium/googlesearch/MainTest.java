@@ -138,7 +138,7 @@ public class MainTest {
         WebElement carCalendar = driver.findElement(By.cssSelector("[data-calendar2-type=\"checkin\"]"));
         carCalendar.click();
 
-        //DONE: Select today's date.
+        //TODO: Select today's date. Access visible calendar without using indexes.
             //DONE: Fix assertion.
         WebElement carCheckInDate = driver.findElement(By.cssSelector("[data-id=\"" + startDate.getTimeInMillis() + "\"]"));
         Assert.assertEquals("" + startDate.get(Calendar.DAY_OF_MONTH), carCheckInDate.getText());
@@ -148,7 +148,7 @@ public class MainTest {
         //WebElement carCheckOutDate = waitForCalendar.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[data-mode=\"checkout\"]")));
         //carCheckOutDate.click();
 
-        //DONE: Select check-out date ten days from now.
+        //TODO: Select check-out date ten days from now.
         WebElement carCheckOutDate = driver.findElements(By.cssSelector("[data-id=\"" + endDate.getTimeInMillis() + "\"]")).get(1);
         Assert.assertEquals(carCheckOutDate.getText().trim(), "" + endDate.get(Calendar.DAY_OF_MONTH));
         carCheckOutDate.click();
@@ -158,16 +158,18 @@ public class MainTest {
         carSearchButton.click();
 
         //DONE: Verify calendar is no longer visible.
-        WebDriverWait waitForHiddenCarCalendar = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebDriverWait waitForHiddenCarCalendar = new WebDriverWait(driver, Duration.ofSeconds(10));
         waitForHiddenCarCalendar.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".bui-calendar__content")));
 
 
 
         //TODO: Verify origin and destination sites correspond with selected.
-        WebDriverWait waitForLandingPage = new WebDriverWait(driver, Duration.ofSeconds(10));
+            //PROBLEM: Chrome perceives this test as a "bot" and as such does not allow me to proceed following line 166.
+            //I cannot seem to solve it by either inserting WebDriverWaits everywhere since it does not seem t slow the test down. I need to find another way to slow it down.
+        WebDriverWait waitForLandingPage = new WebDriverWait(driver, Duration.ofSeconds(5));
         Assert.assertTrue(
                          //driver.findElement(By.cssSelector("[data-testid=\"pick-up-location\"]")).getText().contains("Mar del Plata"
-                        driver.findElement(By.cssSelector(".bgui-u-flex.bgui-u-break.word")).getText().contains("Mar del Plata")
+                        driver.findElement(By.cssSelector("[data-testid=\"pick-up-location\"]")).getText().contains("Mar del Plata")
                         && driver.findElement(By.cssSelector("[data-testid=\"drop-off-location\"]")).getText().contains("Bahía Blanca"),
                 "Landing page header did not contain requested location"
         );
