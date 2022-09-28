@@ -60,7 +60,9 @@ public class MainTest {
         WebElement calendar = waitForCalendar.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".bui-calendar__content")));
 
         //DONE: Select dates for arrival and departure, selecting dates ten days apart.
-        Calendar startDate = setUTCMidnight(Calendar.getInstance());
+
+        //Calendar startDate = setUTCMidnight(Calendar.getInstance());
+        Calendar startDate = Calendar.getInstance();
 
         WebElement checkInDate = waitForCalendar.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".bui-calendar__date--today")));
         Assert.assertEquals(toISODate(startDate), checkInDate.getAttribute("data-date"));
@@ -92,7 +94,7 @@ public class MainTest {
     }
 
     @Test
-    public void testCarRental(){
+    public void testCarRental() throws InterruptedException {
         //---------------------------------------CAR RENTAL TEST--------------------------------------------------------
         //Assignment: Test the same process with car rentals between two different cities using the same website.
 
@@ -106,11 +108,13 @@ public class MainTest {
 
         //Click on car rentals button.
         WebElement carRentalButton = driver.findElement(By.cssSelector("[data-decider-header=\"bookinggo\"]"));
+        Thread.sleep(3000);
         carRentalButton.click();
 
         //Click on "Different return location" button.
         WebDriverWait waitForDifferentReturnLocation = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement differentReturnLocationButton = waitForDifferentReturnLocation.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[for=\"return-location-different\"]")));
+        Thread.sleep(3000);
         differentReturnLocationButton.click();
 
         //Wait for input options.
@@ -118,59 +122,73 @@ public class MainTest {
 
         //Input city of origin.
         WebElement originInput = waitForOriginInput.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#ss_origin")));
+        Thread.sleep(3000);
         originInput.sendKeys("Mar del Plata");
 
         //Select origin site.
         WebDriverWait waitForOriginOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement firstOriginElement = waitForOriginOptions.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("ul.c-autocomplete__list.sb-autocomplete__list.-visible [data-i=\"0\"]")));
+        Thread.sleep(3000);
         firstOriginElement.click();
 
         //Input destination site.
         WebElement destinationInput = driver.findElement(By.id("ss"));
+        Thread.sleep(3000);
         destinationInput.sendKeys("Bahía Blanca");
 
         //Select destination site.
         WebDriverWait waitForDestinationOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement firstDestinationElement = waitForDestinationOptions.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("ul.c-autocomplete__list.sb-autocomplete__list.-visible [data-i=\"0\"]")));
+        Thread.sleep(3000);
         firstDestinationElement.click();
 
         //Click on calendar.
         WebElement carCalendar = driver.findElement(By.cssSelector("[data-calendar2-type=\"checkin\"]"));
+        Thread.sleep(3000);
         carCalendar.click();
 
-        //TODO: Select today's date. Access visible calendar without using indexes.
+        //DONE: Select today's date. Access visible calendar without using indexes.
             //DONE: Fix assertion.
         WebElement carCheckInDate = driver.findElement(By.cssSelector("[data-id=\"" + startDate.getTimeInMillis() + "\"]"));
         Assert.assertEquals("" + startDate.get(Calendar.DAY_OF_MONTH), carCheckInDate.getText());
+        Thread.sleep(3000);
         carCheckInDate.click();
 
         //UNNECESSARY
         //WebElement carCheckOutDate = waitForCalendar.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[data-mode=\"checkout\"]")));
         //carCheckOutDate.click();
 
-        //TODO: Select check-out date ten days from now.
+        //TODO: Select check-out date ten days from now - without using the index to access the check-out calendar.
         WebElement carCheckOutDate = driver.findElements(By.cssSelector("[data-id=\"" + endDate.getTimeInMillis() + "\"]")).get(1);
         Assert.assertEquals(carCheckOutDate.getText().trim(), "" + endDate.get(Calendar.DAY_OF_MONTH));
+        Thread.sleep(3000);
         carCheckOutDate.click();
 
         //DONE: Click on search button.
         WebElement carSearchButton = driver.findElement(By.cssSelector(".sb-searchbox__button"));
+        Thread.sleep(3000);
         carSearchButton.click();
 
         //DONE: Verify calendar is no longer visible.
         WebDriverWait waitForHiddenCarCalendar = new WebDriverWait(driver, Duration.ofSeconds(10));
         waitForHiddenCarCalendar.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".bui-calendar__content")));
 
-
-
         //TODO: Verify origin and destination sites correspond with selected.
-            //PROBLEM: Chrome perceives this test as a "bot" and as such does not allow me to proceed following line 166.
-            //I cannot seem to solve it by either inserting WebDriverWaits everywhere since it does not seem t slow the test down. I need to find another way to slow it down.
-        WebDriverWait waitForLandingPage = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+            //PROBLEM: Chrome perceives this test as a "bot" and as such does not allow me to proceed following line 171.
+            //UPDATE (28/09 09:12): Tried solving problem by adding several flags to chrome configuration. Worked for the first try after that, but not afterwards.
+            //UPDATE (28/09 09:33): Hotel test was re-ran, no related problems encountered.
+            //UPDATE (28/09 10:11): Tried sprinkling driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5)); all over the code. Didn't work.
+            //UPDATE (28/09 11:33): Tried same method but with Thread.sleep(3000); - worked in making the process go slower, didn't prevent browser interruption.
+            //UPDATE (28/09 16:34): Will try to implement less actions and check whether that changes anything. Results: Nothing changed.
+
+        Thread.sleep(3000);
+        WebElement landingPageCheckinInfo = new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[data-testid=\"pick-up-location\"]")));
+        WebElement landingPageCheckoutInfo = new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[data-testid=\"drop-off-location\"]")));
+
         Assert.assertTrue(
-                         //driver.findElement(By.cssSelector("[data-testid=\"pick-up-location\"]")).getText().contains("Mar del Plata"
-                        driver.findElement(By.cssSelector("[data-testid=\"pick-up-location\"]")).getText().contains("Mar del Plata")
-                        && driver.findElement(By.cssSelector("[data-testid=\"drop-off-location\"]")).getText().contains("Bahía Blanca"),
+                landingPageCheckinInfo.getText().contains("Mar del Plata")
+                        && landingPageCheckoutInfo.getText().contains("Bahía Blanca"),
                 "Landing page header did not contain requested location"
         );
 
