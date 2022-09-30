@@ -231,105 +231,112 @@ public class MainTest {
         //---------------------------------------CAR RENTAL TEST--------------------------------------------------------
         //Assignment: Test the same process with car rentals between two different cities using a different website.
 
-        //TODO: Get all necessary selectors and try the test.
+        //TODO: NEVER use aria-label OR placeholders as selectors - prioritize css selectors, use hierarchy and learned techniques.
 
         Calendar startDate = setUTCMidnight(Calendar.getInstance());
 
         Calendar endDate = (Calendar) startDate.clone();
         endDate.add(Calendar.DATE, 10);
 
-        driver.get("https://www.kayak.com/cars");
+        driver.get("https://www.kayak.com.ar/cars");
 
-        //TODO: Click on dropdown.
-        WebElement dropdown = driver.findElement(By.cssSelector(""));
-        Thread.sleep(3000);
+        //Click on dropdown.
+            //NOTE: Appropriate selector is used.
+        WebDriverWait waitForDropdown = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement dropdown = waitForDropdown.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".wIIH-handle")));
         dropdown.click();
 
-        //TODO: Click on "Different drop off".
+        //Click on "Different drop off".
+            //NOTE: Check out li:nth-of-type
         WebDriverWait waitForDifferentReturnLocation = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement differentReturnLocationButton = waitForDifferentReturnLocation.until(ExpectedConditions.
-                visibilityOfElementLocated(By.cssSelector("")));
-        Thread.sleep(3000);
+                visibilityOfElementLocated(By.cssSelector(".QHyi li:last-of-type")));
         differentReturnLocationButton.click();
 
         //Wait for input options.
         WebDriverWait waitForOriginInput = new WebDriverWait(driver, Duration.ofSeconds(5));
 
-        //TODO: Input "Mar del Plata".
+        //TODO: Change selector.
+        //Input "Mar del Plata".
         WebElement originInput = waitForOriginInput.until(ExpectedConditions.visibilityOfElementLocated(By.
-                cssSelector("")));
-        Thread.sleep(3000);
+                cssSelector("[placeholder=\"Origen\"]")));
         originInput.sendKeys("Mar del Plata");
 
-        //TODO: Select first option.
+        //TODO: Change selector.
+        //Select first option.
         WebDriverWait waitForOriginOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement firstOriginElement = waitForOriginOptions.until(ExpectedConditions.visibilityOfElementLocated(By.
-                cssSelector("")));
-        Thread.sleep(3000);
+                cssSelector("[aria-label=\"Mar del Plata, Argentina\"]")));
+        //Thread.sleep(3000);
         firstOriginElement.click();
 
-        //TODO: Input "Bahía Blanca".
-        WebElement destinationInput = driver.findElement(By.id(""));
-        Thread.sleep(3000);
+        //TODO: Change selector.
+        //Input "Bahía Blanca".
+        WebElement destinationInput = driver.findElement(By.cssSelector("[placeholder=\"Destino\"]"));
+        //Thread.sleep(3000);
         destinationInput.sendKeys("Bahía Blanca");
 
-        //TODO: Select first option.
+        //TODO: Change selector.
+        //Select first option.
         WebDriverWait waitForDestinationOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement firstDestinationElement = waitForDestinationOptions.until(ExpectedConditions.
                 visibilityOfElementLocated(By.
-                        cssSelector("")));
-        Thread.sleep(3000);
+                        cssSelector("[aria-label=\"Bahía Blanca, Argentina\"]")));
+        //Thread.sleep(3000);
         firstDestinationElement.click();
 
-        //TODO: Click on calendar
-        WebElement carCalendar = driver.findElement(By.cssSelector(""));
-        Thread.sleep(3000);
+        //--------------------------------------------------ASSIGNMENT--------------------------------------------------
+        //TODO: Select one date four months from now as pickup, then a month from that date as dropoff (after optimizing existing test).
+
+        //TODO: Change selector.
+        //Click on calendar
+        WebElement carCalendar = driver.findElement(By.cssSelector("[aria-label=\"Fecha de inicio en el calendario\"]"));
+        //Thread.sleep(3000);
         carCalendar.click();
 
-        //TODO: Click on pick up date, select today.
-        WebElement carCheckInDate = driver.findElement(By.
-                cssSelector(""));
+        //TODO: Select a date four months from now as pick-up.
+        //TODO: Change selector.
+        WebDriverWait waitForCheckinDate = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement carCheckInDate = waitForCheckinDate.until(ExpectedConditions.visibilityOfElementLocated(By.
+                cssSelector(".mkUa.mkUa-pres-mcfly.mkUa-isStartDate.mkUa-isSelected")));
 
-        Assert.assertEquals("" + startDate.get(Calendar.DAY_OF_MONTH), carCheckInDate.getText());
-        Thread.sleep(3000);
+        //TODO: Fix Assertion
+        //Thread.sleep(3000);
+        Assert.assertEquals(carCheckInDate.getText(),"" + startDate.get(Calendar.DAY_OF_MONTH));
         carCheckInDate.click();
 
-        //TODO: Click on drop off date, select ten days from today.
-        WebElement carCheckOutDate = driver.findElement(By.
-                cssSelector(""));
+        //TODO: Select a date a month after pick-up as drop-off.
+        //TODO: Change selector.
+        //WebElement carCheckOutDate = driver.findElement(By.cssSelector(".mkUa.mkUa-pres-mcfly"));
 
-        Assert.assertEquals(carCheckOutDate.getText().trim(), "" + endDate.get(Calendar.DAY_OF_MONTH));
-        Thread.sleep(3000);
-        carCheckOutDate.click();
+        //TODO: Fix Assertion
+        //Assert.assertEquals(carCheckOutDate.getText().trim(), "" + endDate.get(Calendar.DAY_OF_MONTH));
+        //carCheckOutDate.click();
 
-        //TODO:: Click on search button.
-        WebElement carSearchButton = driver.findElement(By.cssSelector(""));
-        Thread.sleep(3000);
+        //Click on search button.
+        WebElement carSearchButton = driver.findElement(By.cssSelector(".MPAi-button"));
         carSearchButton.click();
 
-       //TODO: Verify pick-up and drop-off locations correspond with selected.
-        Thread.sleep(3000);
-        WebElement landingPageCheckinInfo = new WebDriverWait(driver, Duration.ofSeconds(5)).
-                until(ExpectedConditions.visibilityOfElementLocated(By.
-                        cssSelector("")));
-        WebElement landingPageCheckoutInfo = new WebDriverWait(driver, Duration.ofSeconds(5)).
-                until(ExpectedConditions.visibilityOfElementLocated(By.
-                        cssSelector("")));
+       //Verify pick-up and drop-off locations correspond with selected.
+        //TODO: Change selector.
+        WebElement landingPageLocationInfo = driver.findElements(By.
+                cssSelector(".eszI-location")).get(1);
 
         Assert.assertTrue(
-                landingPageCheckinInfo.getText().contains("Mar del Plata")
-                        && landingPageCheckoutInfo.getText().contains("Bahía Blanca"),
-                "Landing page header did not contain requested location"
+                landingPageLocationInfo.getText().contains("Mar del Plata")
+                        && landingPageLocationInfo.getText().contains("Bahía Blanca"),
+                "Landing page header did not contain requested locations"
         );
 
-        //TODO: Verify pick-up and drop-off dates correspond with selected.
-        Assert.assertEquals(driver.findElement(By.cssSelector("")).getText(),
-                startDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(startDate.getTime()),
-                "Landing page check in date did not match selected check in date");
-        Assert.assertEquals(driver.findElement(By.cssSelector("")).getText(),
-                endDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(endDate.getTime()),
-                "Landing page check out date did not match selected check out date");
+        //TODO: Fix assertions -  pick-up and drop-off dates correspond with selected.
+        //Assert.assertTrue(driver.findElement(By.cssSelector(".lfBz-field-outline.lfBz-mod-presentation-compact.lfBz-mod-full-width"))
+        //                .getText().contains("" + startDate.get(Calendar.DAY_OF_MONTH)),
+        //        "Landing page check in date did not match selected check in date");
+        //Assert.assertTrue(driver.findElement(By.cssSelector(".lfBz-field-outline.lfBz-mod-presentation-compact.lfBz-mod-full-width"))
+        //                .getText().contains("" + endDate.get(Calendar.DAY_OF_MONTH)),
+        //        "Landing page check out date did not match selected check out date");
     }
+
 
     public String toISODate(Calendar calendar){
         return DateTimeFormatter.ISO_LOCAL_DATE.format(calendar.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
