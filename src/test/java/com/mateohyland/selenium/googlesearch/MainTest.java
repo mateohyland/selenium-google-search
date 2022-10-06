@@ -1,16 +1,16 @@
 package com.mateohyland.selenium.googlesearch;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
-
 import java.text.DateFormat;
 import java.time.Duration;
 import java.time.ZoneId;
@@ -19,9 +19,13 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+//TODO: Download new driver that can work with the current version of chrome.
+
 public class MainTest {
 
-    protected ChromeDriver driver;
+    public static WebDriverManager wdm;
+
+    protected WebDriver driver;
     protected DateFormat dateFormat;
 
     public MainTest(){
@@ -33,12 +37,17 @@ public class MainTest {
         System.setProperty("webdriver.firefox.logfile", "/dev/null");
         System.setProperty("webdriver.ie.driver.silent", "true");
         System.setProperty("webdriver.opera.silentOutput", "true");
-        System.setProperty("webdriver.chrome.driver", "C:\\ChromeDriver\\chromedriver.exe");
+    }
+
+    @BeforeSuite
+    public void beforeAll(){
+        wdm = WebDriverManager.getInstance("chrome");
+        wdm.setup();
     }
 
     @BeforeMethod
     public void beforeTest(){
-        driver = new ChromeDriver();
+        driver = wdm.create();
         dateFormat = DateFormat.getDateInstance(DateFormat.FULL, new Locale("es", "AR"));
     }
 
@@ -128,7 +137,7 @@ public class MainTest {
         //Click on "Different return location" button.
         WebDriverWait waitForDifferentReturnLocation = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement differentReturnLocationButton = waitForDifferentReturnLocation.until(ExpectedConditions.
-                visibilityOfElementLocated(By.cssSelector("[for=\"return-location-different\"]")));
+                visibilityOfElementLocated(By.id("return-location-different")));
         Thread.sleep(3000);
         differentReturnLocationButton.click();
 
@@ -137,14 +146,14 @@ public class MainTest {
 
         //Input city of origin.
         WebElement originInput = waitForOriginInput.until(ExpectedConditions.visibilityOfElementLocated(By.
-                cssSelector("#ss_origin")));
+                id("ss_origin")));
         Thread.sleep(3000);
         originInput.sendKeys("Mar del Plata");
 
         //Select origin site.
         WebDriverWait waitForOriginOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement firstOriginElement = waitForOriginOptions.until(ExpectedConditions.visibilityOfElementLocated(By.
-                cssSelector("ul.c-autocomplete__list.sb-autocomplete__list.-visible [data-i=\"0\"]")));
+                cssSelector(".sb-autocomplete__item-with_photo.sb-autocomplete__item--city")));
         Thread.sleep(3000);
         firstOriginElement.click();
 
@@ -157,7 +166,7 @@ public class MainTest {
         WebDriverWait waitForDestinationOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
         WebElement firstDestinationElement = waitForDestinationOptions.until(ExpectedConditions.
                 visibilityOfElementLocated(By.
-                        cssSelector("ul.c-autocomplete__list.sb-autocomplete__list.-visible [data-i=\"0\"]")));
+                        cssSelector(".sb-autocomplete__item-with_photo.sb-autocomplete__item--city")));
         Thread.sleep(3000);
         firstDestinationElement.click();
 
@@ -287,6 +296,11 @@ public class MainTest {
         //TODO: Select a date four months from now as pickup, then a month from that date as drop-off (after optimizing
         // existing test).
 
+        //Note on nth-of-type:
+        //table:nth-of-type(2) tr:nth-of-type(2) td:nth-of-type(2)
+
+        //TODO: Use calendar to calculate dates. Check earlier tests.
+
         //Click on calendar
         WebElement carCalendar = driver.findElements(By.cssSelector(".sb-date-field__icon")).get(0);
         //Thread.sleep(3000);
@@ -295,6 +309,7 @@ public class MainTest {
         //TODO: Select a date four months from now as pick-up.
         //WebDriverWait waitForCheckinDate = new WebDriverWait(driver, Duration.ofSeconds(5));
 
+        //This loop will make the 240th day from the start date visible by accessing the fourth month calendar.
         WebElement nextMonth = driver.findElements(By.cssSelector(".c2-button-inner")).get(1);
         for(int i = 0; i < 3; i++){
             nextMonth.click();
@@ -313,7 +328,7 @@ public class MainTest {
 
         //TODO: Fix this selector, it doesn't work. My thinking: five months from now is 270 days from now, so I pick a
         // date 270 days or five months from today.
-        WebElement carCheckOutDate = driver.findElement(By.cssSelector(".c2-day td:nth-of-type(270"));
+        WebElement carCheckOutDate = driver.findElement(By.cssSelector(".c2-day td:nth-of-type(270)"));
 
         //TODO: Fix Assertion
         Assert.assertEquals(carCheckOutDate.getText().trim(), "" + endDate.get(Calendar.DAY_OF_MONTH));
@@ -324,7 +339,6 @@ public class MainTest {
         carSearchButton.click();
 
        //Verify pick-up and drop-off locations correspond with selected.
-        //TODO: Change selector.
         WebElement landingPageLocationInfo = driver.findElements(By.
                 cssSelector(".eszI-location")).get(1);
 
@@ -335,6 +349,7 @@ public class MainTest {
         );
 
         //TODO: Fix assertions -  pick-up and drop-off dates correspond with selected.
+            //TODO: Check if selectors can be optimized by eliminating style references.
         Assert.assertTrue(driver.findElement(By.cssSelector(".lfBz-field-outline.lfBz-mod-presentation-compact.lfBz-mod-full-width"))
                         .getText().contains("" + startDate.get(Calendar.DAY_OF_MONTH)),
                 "Landing page check in date did not match selected check in date");
@@ -349,6 +364,9 @@ public class MainTest {
         //Goal: to exercise acquired knowledge developing a similar test to the previous one using a different website.
 
         //TODO: NEVER use aria-label OR placeholders as selectors - prioritize css selectors, use hierarchy and learned techniques.
+        //TODO: NEVER use sleepers. Only use WaitFor.
+
+        //Use webdriverwait.
 
         Calendar startDate = setUTCMidnight(Calendar.getInstance());
 
@@ -357,7 +375,58 @@ public class MainTest {
 
         driver.get("https://www.despegar.com.ar/");
 
-        //TODO: Complete test.
+        WebElement originInput = driver.findElements(By.cssSelector(".sbox-places-origin--G_Rvw input")).get(0);
+        originInput.sendKeys("Buenos Aires");
+
+        WebElement firstOriginElement = driver.findElement(By.cssSelector(".item.-active"));
+        firstOriginElement.click();
+
+        WebElement destinationInput = driver.findElements(By.cssSelector(".sbox-places-destination--1xd0k")).get(0);
+        destinationInput.sendKeys("Paris");
+
+        WebElement firstDestinationElement = driver.findElement(By.cssSelector(".item.-active"));
+        firstDestinationElement.click();
+
+        WebElement departureCalendar = driver.findElements(By.cssSelector(".sbox5-dates-input1")).get(0);
+        departureCalendar.click();
+
+        Thread.sleep(3000);
+
+        WebElement departureDate = driver.findElements(By.cssSelector(".sbox5-monthgrid-datenumber.-today")).get(0);
+        departureDate.click();
+
+        Thread.sleep(3000);
+
+        WebElement returnDate = driver.findElements(By.
+                cssSelector(".sbox5-monthgrid-datenumber.-in-range:nth-of-type(7)")).get(0);
+        returnDate.click();
+
+        WebElement applyButton = driver.findElement(By.cssSelector(".sbox5-3-btn.-primary.-lg"));
+        applyButton.click();
+
+        WebElement passengerCount = driver.findElements(By.cssSelector(".sbox5-distributionPassengers")).get(0);
+        passengerCount.click();
+
+        WebElement addAdultPassenger = driver.findElements(By.cssSelector(".steppers-icon-right")).get(0);
+        addAdultPassenger.click();
+
+        WebElement addChildPassenger = driver.findElements(By.cssSelector(".steppers-icon-right")).get(1);
+        addChildPassenger.click();
+
+        WebElement childAgeDropdown = driver.findElement(By.cssSelector(".select.select"));
+        childAgeDropdown.click();
+
+        WebElement childAge = driver.findElement(By.cssSelector("[value=\"7\"]"));
+        childAge.click();
+
+        WebElement applyButton2 = driver.findElement(By.cssSelector(".sbox5-3-btn.-md.-primary"));
+        applyButton2.click();
+
+        WebElement searchButton = driver.findElement(By.cssSelector(".sbox5-box-button-ovr--3LK5x"));
+        searchButton.click();
+
+        //TODO: Validate landing page results correspond with search terms inputted.
+
     }
 
     public String toISODate(Calendar calendar){
