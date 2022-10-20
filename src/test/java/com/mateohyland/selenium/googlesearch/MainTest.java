@@ -205,12 +205,6 @@ public class MainTest {
                 cssSelector(".bui-calendar__content")));
 
         //TODO: Verify origin and destination sites correspond with selected.
-            //PROBLEM: Chrome perceives this test as a "bot" and as such does not allow me to proceed following line 171.
-            //UPDATE (28/09 09:12): Tried solving problem by adding several flags to chrome configuration. Worked for the first try after that, but not afterwards.
-            //UPDATE (28/09 09:33): Hotel test was re-ran, no related problems encountered.
-            //UPDATE (28/09 10:11): Tried sprinkling driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5)); all over the code. Didn't work.
-            //UPDATE (28/09 11:33): Tried same method but with Thread.sleep(3000); - worked in making the process go slower, didn't prevent browser interruption.
-            //UPDATE (28/09 16:34): Will try to implement less actions and check whether that changes anything. Results: Nothing changed.
 
         Thread.sleep(3000);
         WebElement landingPageCheckinInfo = new WebDriverWait(driver, Duration.ofSeconds(5)).
@@ -364,8 +358,6 @@ public class MainTest {
         //Goal: to exercise acquired knowledge developing a similar test to the previous one using a different website.
 
         //TODO: NEVER use aria-label OR placeholders as selectors - prioritize css selectors, use hierarchy and learned techniques.
-        //TODO: NEVER use sleepers. Only use WaitFor.
-
         //Use webdriverwait.
 
         Calendar startDate = setUTCMidnight(Calendar.getInstance());
@@ -375,28 +367,45 @@ public class MainTest {
 
         driver.get("https://www.despegar.com.ar/");
 
+        WebDriverWait waitForPopup = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement loginPopupClose = waitForPopup.until(ExpectedConditions.visibilityOfElementLocated(By.className("login-incentive--close")));
+        loginPopupClose.click();
+
         WebElement originInput = driver.findElements(By.cssSelector(".sbox-places-origin--G_Rvw input")).get(0);
+        originInput.click();
         originInput.sendKeys("Buenos Aires");
 
-        WebElement firstOriginElement = driver.findElement(By.cssSelector(".item.-active"));
+        WebDriverWait waitForOriginOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement firstOriginElement = waitForOriginOptions.until(ExpectedConditions.
+                visibilityOfElementLocated(By.cssSelector(".item.-active")));
         firstOriginElement.click();
 
-        WebElement destinationInput = driver.findElements(By.cssSelector(".sbox-places-destination--1xd0k")).get(0);
+        WebDriverWait waitForDropdown = new WebDriverWait(driver, Duration.ofSeconds(5));
+        waitForDropdown.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".ac-container")));
+
+        WebDriverWait waitForDestinationInput = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement destinationInput = waitForDestinationInput.until(ExpectedConditions.elementToBeClickable(
+                By.cssSelector(".sbox-places-destination--1xd0k input")));
+        destinationInput.click();
+
+        //TODO: write a CUSTOM expected condition that returns the dropdown itself in order to avoid the sleep.
+        //This sleep was put in place in order to avoid a bug on the site only discovered when running automatized tests.
+        Thread.sleep(500);
+
         destinationInput.sendKeys("Paris");
 
-        WebElement firstDestinationElement = driver.findElement(By.cssSelector(".item.-active"));
+        WebDriverWait waitForDestinationOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
+        WebElement firstDestinationElement = waitForDestinationOptions.until(ExpectedConditions.
+                visibilityOfElementLocated(By.cssSelector(".item.-active")));
         firstDestinationElement.click();
 
         WebElement departureCalendar = driver.findElements(By.cssSelector(".sbox5-dates-input1")).get(0);
         departureCalendar.click();
 
-        Thread.sleep(3000);
-
         WebElement departureDate = driver.findElements(By.cssSelector(".sbox5-monthgrid-datenumber.-today")).get(0);
         departureDate.click();
 
-        Thread.sleep(3000);
-
+        //TODO: change selector, find correct date by other methods - perhaps using Calendar class (see previous tests).
         WebElement returnDate = driver.findElements(By.
                 cssSelector(".sbox5-monthgrid-datenumber.-in-range:nth-of-type(7)")).get(0);
         returnDate.click();
