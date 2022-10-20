@@ -290,7 +290,6 @@ public class MainTest {
         //TODO: Select a date four months from now as pickup, then a month from that date as drop-off (after optimizing
         // existing test).
 
-        //Note on nth-of-type:
         //table:nth-of-type(2) tr:nth-of-type(2) td:nth-of-type(2)
 
         //TODO: Use calendar to calculate dates. Check earlier tests.
