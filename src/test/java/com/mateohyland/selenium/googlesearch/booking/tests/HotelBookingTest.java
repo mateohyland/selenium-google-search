@@ -9,6 +9,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.Calendar;
 
 public class HotelBookingTest extends BookingTest {
@@ -18,7 +19,8 @@ public class HotelBookingTest extends BookingTest {
         //-----------------------------------ACCOMMODATION SEARCH TEST--------------------------------------------------
         driver.get("https://www.booking.com/index.es-ar.html");
 
-        WebElement searchInput = driver.findElement(By.id("ss"));
+        WebDriverWait waitForSearchInput = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement searchInput = waitForSearchInput.until(ExpectedConditions.visibilityOfElementLocated(By.id("ss")));
         searchInput.sendKeys("camboriu");
 
         WebDriverWait waitForOptions = new WebDriverWait(driver, Duration.ofSeconds(5));
@@ -35,7 +37,7 @@ public class HotelBookingTest extends BookingTest {
         //DONE: Select dates for arrival and departure, selecting dates ten days apart.
 
         //Calendar startDate = setUTCMidnight(Calendar.getInstance());
-        Calendar startDate = Calendar.getInstance();
+        LocalDate startDate = LocalDate.now();
 
         WebElement checkInDate = waitForCalendar.until(ExpectedConditions.visibilityOfElementLocated(By.
                 cssSelector(".bui-calendar__date--today")));
@@ -43,8 +45,7 @@ public class HotelBookingTest extends BookingTest {
         Assert.assertEquals(toISODate(startDate), checkInDate.getAttribute("data-date"));
         checkInDate.click();
 
-        Calendar endDate = (Calendar) startDate.clone();
-        endDate.add(Calendar.DATE, 10);
+        LocalDate endDate = LocalDate.now().plusDays(7);
 
         WebElement checkOutDate = waitForCalendar.until(ExpectedConditions.visibilityOfElementLocated(By.
                 cssSelector("td[data-date=\"" + toISODate(endDate) + "\"]")));
@@ -73,12 +74,12 @@ public class HotelBookingTest extends BookingTest {
         // Hypothesis: language difference.
         // Proposed solution: change site language to English.
         //DONE: Verify the selected dates correspond with the information available on the landing page.
-        Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"date-display-field-start\"]")).getText(),
-                startDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(startDate.getTime()),
+        Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"date-display-field-start\"]")).getText().toLowerCase(),
+                startDate.getDayOfMonth() + "\n" + dateFormat.format(startDate).toLowerCase(),
                 "Landing page check in date did not match selected check in date");
 
-        Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"date-display-field-end\"]")).getText(),
-                endDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(endDate.getTime()),
+        Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"date-display-field-end\"]")).getText().toLowerCase(),
+                endDate.getDayOfMonth() + "\n" + dateFormat.format(endDate).toLowerCase(),
                 "Landing page check out date did not match selected check out date");
     }
 

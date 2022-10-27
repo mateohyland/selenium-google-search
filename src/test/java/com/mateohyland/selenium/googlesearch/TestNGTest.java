@@ -7,6 +7,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -55,7 +56,7 @@ public class TestNGTest {
         driver.quit();
     }
 
-    public String toISODate(Calendar calendar){
-        return DateTimeFormatter.ISO_LOCAL_DATE.format(calendar.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+    public String toISODate(LocalDate localDate){
+        return DateTimeFormatter.ISO_LOCAL_DATE.format(localDate);
     }
 }

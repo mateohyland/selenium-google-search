@@ -7,6 +7,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.Test;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 
 public class FlightBookingTest extends TestNGTest {
@@ -19,15 +21,19 @@ public class FlightBookingTest extends TestNGTest {
         //TODO: NEVER use aria-label OR placeholders as selectors - prioritize css selectors, use hierarchy and learned techniques.
         //Use webdriverwait.
 
-        Calendar startDate = setUTCMidnight(Calendar.getInstance());
+        //Calendar startDate = setUTCMidnight(Calendar.getInstance());
 
-        Calendar endDate = (Calendar) startDate.clone();
-        endDate.add(Calendar.DATE, 10);
+        //Calendar endDate = (Calendar) startDate.clone();
+        //endDate.add(Calendar.DATE, 10);
+
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = LocalDate.from(startDate).plusDays(10);
 
         driver.get("https://www.despegar.com.ar/");
 
         WebDriverWait waitForPopup = new WebDriverWait(driver, Duration.ofSeconds(5));
-        WebElement loginPopupClose = waitForPopup.until(ExpectedConditions.visibilityOfElementLocated(By.className("login-incentive--close")));
+        WebElement loginPopupClose = waitForPopup.until(ExpectedConditions.visibilityOfElementLocated(By.
+                className("login-incentive--close")));
         loginPopupClose.click();
 
         WebElement originInput = driver.findElements(By.cssSelector(".sbox-places-origin--G_Rvw input")).get(0);

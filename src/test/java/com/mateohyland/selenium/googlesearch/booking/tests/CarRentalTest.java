@@ -8,6 +8,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Calendar;
 
 public class CarRentalTest extends BookingTest{
@@ -17,10 +19,8 @@ public class CarRentalTest extends BookingTest{
         //---------------------------------------CAR RENTAL TEST--------------------------------------------------------
         //Assignment: Test the same process with car rentals between two different cities using the same website.
 
-        Calendar startDate = setUTCMidnight(Calendar.getInstance());
-
-        Calendar endDate = (Calendar) startDate.clone();
-        endDate.add(Calendar.DATE, 10);
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = LocalDate.now().plusDays(10);
 
         //Return to home page.
         driver.get("https://www.booking.com/index.es-ar.html");
@@ -73,8 +73,8 @@ public class CarRentalTest extends BookingTest{
 
         //DONE: Select today's date. Access visible calendar without using indexes.
         WebElement carCheckInDate = driver.findElement(By.
-                cssSelector("[data-id=\"" + startDate.getTimeInMillis() + "\"]"));
-        Assert.assertEquals("" + startDate.get(Calendar.DAY_OF_MONTH), carCheckInDate.getText());
+                cssSelector("[data-id=\"" + startDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC)*1000 + "\"]"));
+        Assert.assertEquals("" + startDate.getDayOfMonth(), carCheckInDate.getText());
         Thread.sleep(3000);
         carCheckInDate.click();
 
@@ -84,9 +84,9 @@ public class CarRentalTest extends BookingTest{
 
         //TODO: Select check-out date ten days from now - without using the index to access the check-out calendar.
         WebElement carCheckOutDate = driver.findElements(By.
-                cssSelector("[data-id=\"" + endDate.getTimeInMillis() + "\"]")).get(1);
+                cssSelector("[data-id=\"" + endDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC)*1000 + "\"]")).get(1);
 
-        Assert.assertEquals(carCheckOutDate.getText().trim(), "" + endDate.get(Calendar.DAY_OF_MONTH));
+        Assert.assertEquals(carCheckOutDate.getText().trim(), "" + endDate.getDayOfMonth());
         Thread.sleep(3000);
         carCheckOutDate.click();
 
@@ -118,10 +118,10 @@ public class CarRentalTest extends BookingTest{
 
         //TODO: Verify check-in and check-out dates correspond with selected.
         Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"pick-up-date\"]")).getText(),
-                startDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(startDate.getTime()),
+                startDate.getDayOfMonth() + "\n" + dateFormat.format(startDate),
                 "Landing page check in date did not match selected check in date");
         Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"drop-off-date\"]")).getText(),
-                endDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(endDate.getTime()),
+                endDate.getDayOfMonth() + "\n" + dateFormat.format(endDate),
                 "Landing page check out date did not match selected check out date");
     }
 
