@@ -69,10 +69,14 @@ public class HotelBookingTest extends BookingTest {
                         cssSelector("[data-component=\"arp-header\"] h1")).getText().contains("Camboriú"),
                 "Landing page header did not contain requested location");
 
+        //TODO: Fix error with these assertions.
+        // Hypothesis: language difference.
+        // Proposed solution: change site language to English.
         //DONE: Verify the selected dates correspond with the information available on the landing page.
         Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"date-display-field-start\"]")).getText(),
                 startDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(startDate.getTime()),
                 "Landing page check in date did not match selected check in date");
+
         Assert.assertEquals(driver.findElement(By.cssSelector("[data-testid=\"date-display-field-end\"]")).getText(),
                 endDate.get(Calendar.DAY_OF_MONTH) + "\n" + dateFormat.format(endDate.getTime()),
                 "Landing page check out date did not match selected check out date");
